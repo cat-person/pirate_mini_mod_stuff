@@ -1,0 +1,17 @@
+{
+    "id": "trading_intel",
+    "name": "Trading Intel",
+    "author": "Not a cat",
+    "utility": true,
+    "version": "0.0.1",
+    "description": "A collection of intel boards for Starsector",
+    "gameVersion": "0.97a",
+    "modPlugin": "net.not_a_cat.TemplateModPlugin",
+    "dependencies": [
+        {
+            "id": "lunalib",
+            "name": "LunaLib"
+        }
+    ],
+    "jars": ["jars/Trading Intel.jar"]
+}
