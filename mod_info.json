@@ -1,17 +1,11 @@
 {
-    "id": "trading_intel",
-    "name": "Trading Intel",
+    "id": "hullmods_and_systems",
+    "name": "Hullmods and Systems",
     "author": "Not a cat",
     "utility": true,
     "version": "0.0.1",
-    "description": "A collection of intel boards for Starsector",
+    "description": "A collection of hullmods and systems",
     "gameVersion": "0.97a",
-    "modPlugin": "net.not_a_cat.TemplateModPlugin",
-    "dependencies": [
-        {
-            "id": "lunalib",
-            "name": "LunaLib"
-        }
-    ],
-    "jars": ["jars/Trading Intel.jar"]
+    "modPlugin": "net.not_a_cat.HullmodsAndSystemsModPlugin",
+    "jars": ["jars/Mod.jar"]
 }
