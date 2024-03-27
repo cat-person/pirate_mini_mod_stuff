@@ -1,169 +1,156 @@
 package net.not_a_cat.ship_systems;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.combat.*;
-import com.fs.starfarer.api.impl.campaign.ids.Stats;
-import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.combat.BaseShipSystemScript;
 import com.fs.starfarer.api.plugins.ShipSystemStatsScript;
-import com.fs.starfarer.api.util.IntervalUtil;
-import com.fs.starfarer.api.util.TimeoutTracker;
-import org.lwjgl.Sys;
 
 import java.awt.Color;
 
 public class InvisibilityShipsystem extends BaseShipSystemScript {
-    protected float getDisruptionLevel(ShipAPI ship) {
-        return 0f;
-    }
-
     Long systemActivationMillis = 0L;
-    ShipSystemAPI.SystemState prevFrameState;
 
-    protected void maintainStatus(ShipAPI playerShip, ShipSystemStatsScript.State state, float effectLevel) {
-//        float f = VULNERABLE_FRACTION;
-//        ShipSystemAPI cloak = playerShip.getPhaseCloak();
-//        if (cloak == null) cloak = playerShip.getSystem();
-//        if (cloak == null) return;
-//        if (effectLevel > f) {
-//            Global.getCombatEngine().maintainStatusForPlayerShip(STATUSKEY2,
-//                cloak.getSpecAPI().getIconSpriteName(),
-//                cloak.getDisplayName(),
-//                "time flow altered",
-//                false);
-//        } else {
-//            // Logic for alternative case not provided
-//        }
-//        if (FLUX_LEVEL_AFFECTS_SPEED) {
-//            if (effectLevel > f) {
-//                if (getDisruptionLevel(playerShip) <= 0f) {
-//                    Global.getCombatEngine().maintainStatusForPlayerShip(STATUSKEY3,
-//                        cloak.getSpecAPI().getIconSpriteName(),
-//                        "phase coils stable",
-//                        "top speed at 100%",
-//                        false);
-//                } else {
-//                    float speedMult = getSpeedMult(playerShip, effectLevel);
-//                    String speedPercentStr = (int)(speedMult * 100f) + "%";
-//                    Global.getCombatEngine().maintainStatusForPlayerShip(STATUSKEY3,
-//                        cloak.getSpecAPI().getIconSpriteName(),
-//                        "phase coil stress",
-//                        "top speed at " + speedPercentStr,
-//                        true);
-//                }
-//            }
-//        }
+    @Override
+    public String getInfoText(ShipSystemAPI system, ShipAPI ship) {
+        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::getInfoText(%s, %s)", system.getId(), ship.getId()));
+        return super.getInfoText(system, ship);
     }
 
+    @Override
+    public boolean isUsable(ShipSystemAPI system, ShipAPI ship) {
+        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::isUsable(%s, %s)", system.getId(), ship.getId()));
+        return super.isUsable(system, ship);
+    }
 
+    @Override
+    public float getActiveOverride(ShipAPI ship) {
+        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::getActiveOverride(%s)", ship.getId()));
+        return super.getActiveOverride(ship);
+    }
+
+    @Override
+    public float getInOverride(ShipAPI ship) {
+        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::getInOverride(%s)", ship.getId()));
+        return super.getInOverride(ship);
+
+    }
+
+    @Override
+    public float getOutOverride(ShipAPI ship) {
+        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::getOutOverride(%s)", ship.getId()));
+        return super.getOutOverride(ship);
+    }
+
+    @Override
+    public float getRegenOverride(ShipAPI ship) {
+        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::getRegenOverride(%s)", ship.getId()));
+        return super.getRegenOverride(ship);
+    }
+
+    @Override
+    public int getUsesOverride(ShipAPI ship) {
+        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::getUsesOverride(%s)", ship.getId()));
+        return super.getUsesOverride(ship);
+    }
+
+    @Override
+    public String getDisplayNameOverride(State state, float effectLevel) {
+        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::getDisplayNameOverride(%s, %f)", state, effectLevel));
+        return super.getDisplayNameOverride(state, effectLevel);
+    }
 
     @Override
     public void apply(MutableShipStatsAPI stats, String id, ShipSystemStatsScript.State state, float effectLevel) {
-        ShipAPI myShip;
-        boolean player;
+        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::apply(%s, %s, %s, %f)", stats, id, state, effectLevel));
         if (!(stats.getEntity() instanceof ShipAPI)) {
             return;
         }
 
-        myShip = (ShipAPI) stats.getEntity();
-        ShipSystemAPI cloak = myShip.getPhaseCloak();
-        if (cloak == null || !cloak.canBeActivated()) {
-            return;
-        }
-
-        ShipSystemAPI invisibilitySystem = myShip.getSystem();
-        Global.getLogger(InvisibilityShipsystem.class).info("Invisibility: " + invisibilitySystem.getState());
-        ShipSystemAPI.SystemState currentState = invisibilitySystem.getState();
-        if (prevFrameState != currentState) {
-            switch (currentState) {
-                case IDLE:
-                    myShip.resetOverloadColor();
-                    // Do nothing
-                    break;
-                case ACTIVE:
-                    if (1000L < System.currentTimeMillis() - systemActivationMillis) {
-                        cloak.forceState(ShipSystemAPI.SystemState.IDLE, 0f);
-                        myShip.setOverloadColor(Color.black);
-                    } else {
-                        myShip.setHoldFireOneFrame(true);
+        Long currentTime = System.currentTimeMillis();
+        ShipAPI hostShip = (ShipAPI) stats.getEntity();
+        Global.getLogger(InvisibilityShipsystem.class).info("Invisibility: " + state);
+        switch (state) {
+            case IDLE:
+                break;
+            case ACTIVE:
+                for (WeaponAPI weapon : hostShip.getAllWeapons()) {
+                    if (weapon.isFiring()) {
+                        hostShip.getSystem().deactivate();
                     }
-                    for (WeaponAPI weapon : myShip.getAllWeapons()) {
-                        if (weapon.isFiring()) {
-                            invisibilitySystem.deactivate();
-                        }
-                    }
-                    break;
-                case IN:
-                    SettingsAPI settingsAPI = Global.getSettings();
-                    CombatEngineAPI combatEngine = Global.getCombatEngine();
-                    combatEngine.spawnAsteroid(3, myShip.getLocation().x, myShip.getLocation().y, 0f, 0f);
-                    myShip.getLocation().set(1000f, 1000f);
-                    for (ShipAPI ship : combatEngine.getShips()) {
-                        ship.setShipAI(new ShipAIPlugin() {
-                            @Override
-                            public void setDoNotFireDelay(float amount) {
-
-                            }
-
-                            @Override
-                            public void forceCircumstanceEvaluation() {
-
-                            }
-
-                            @Override
-                            public void advance(float amount) {
-
-                            }
-
-                            @Override
-                            public boolean needsRefit() {
-                                return false;
-                            }
-
-                            @Override
-                            public ShipwideAIFlags getAIFlags() {
-                                return null;
-                            }
-
-                            @Override
-                            public void cancelCurrentManeuver() {
-
-                            }
-
-                            @Override
-                            public ShipAIConfig getConfig() {
-                                return null;
-                            }
-                        });
-
-                    }
-
-                    systemActivationMillis = System.currentTimeMillis();
-                    cloak.forceState(ShipSystemAPI.SystemState.ACTIVE, 0f);
-                    break;
-                case OUT:
-//                myShip.getMutableStats().getEntity().setCollisionRadius(100);
-                    myShip.resetOverloadColor();
-                    systemActivationMillis = 0L;
-                    break;
-                case COOLDOWN:
-                    myShip.resetOverloadColor();
-                    // Chill
-                    break;
-            }
-            prevFrameState = currentState;
+                }
+                break;
+            case IN:
+                if(systemActivationMillis == 0L){
+                    systemActivationMillis = phaseIn(hostShip);
+                } else if (300L < currentTime - systemActivationMillis){
+                    becomeInvisible(hostShip);
+                    phaseOut(hostShip);
+                } else if (3000L < currentTime - systemActivationMillis){
+                    becomeVisible(hostShip);
+                }
+                break;
+            case OUT:
+                becomeVisible(hostShip);
+                systemActivationMillis = 0L;
+                break;
+            case COOLDOWN:
+                systemActivationMillis = 0L;
+                break;
         }
     }
 
     @Override
     public void unapply(MutableShipStatsAPI stats, String id) {
-        // ??
+        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::unapply(%s, %s, %s, %f)", stats, id));
+    }
+
+    Long phaseIn(ShipAPI hostShip) {
+        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::phaseIn(%s)", hostShip.getId()));
+        ShipSystemAPI cloak = hostShip.getPhaseCloak();
+        if (cloak == null || !cloak.canBeActivated()) {
+            return 0L;
+        }
+        cloak.forceState(ShipSystemAPI.SystemState.ACTIVE, 0f);
+        hostShip.setHoldFireOneFrame(true);
+        return System.currentTimeMillis();
+    }
+
+    Long becomeInvisible(ShipAPI hostShip) {
+        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::becomeInvisible(%s)", hostShip.getId()));
+//        hostShip.getMutableStats().getHullDamageTakenMult().modifyMult("invisibility", 0f);
+//        hostShip.getMutableStats().getArmorDamageTakenMult().modifyMult("invisibility", 0f);
+//        hostShip.getMutableStats().getEngineDamageTakenMult().modifyMult("invisibility", 0f);
+
+        Global.getCombatEngine().removeEntity(hostShip);
+
+        Global.getCombatEngine().getPlayerShip();
+
+//        Global.getCombatEngine().addEntity();
+
+        return System.currentTimeMillis();
+    }
+    Long phaseOut(ShipAPI hostShip) {
+        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::phaseOut(%s)", hostShip.getId()));
+        ShipSystemAPI cloak = hostShip.getPhaseCloak();
+        if (cloak == null || !cloak.canBeActivated()) {
+            return 0L;
+        }
+
+        cloak.forceState(ShipSystemAPI.SystemState.IDLE, 0f);
+        return 0L;
+    }
+
+    void becomeVisible(ShipAPI hostShip){
+        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::becomeVisible(%s)", hostShip.getId()));
+
+//        hostShip.getMutableStats().getHullDamageTakenMult().modifyMult("invisibility", 1f);
+//        hostShip.getMutableStats().getArmorDamageTakenMult().modifyMult("invisibility", 1f);
+//        hostShip.getMutableStats().getEngineDamageTakenMult().modifyMult("invisibility", 1f);
     }
 
     @Override
     public StatusData getStatusData(int index, ShipSystemStatsScript.State state, float effectLevel) {
-        super.getStatusData(index, state, effectLevel);
-        return null;
+        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::getStatusData(%d, %s, %f)", index, state, effectLevel));
+        return super.getStatusData(index, state, effectLevel);
     }
 }
