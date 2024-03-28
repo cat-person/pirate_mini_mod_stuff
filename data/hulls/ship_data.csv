@@ -2,3 +2,4 @@ name,id,designation,tech/manufacturer,system id,fleet pts,hitpoints,armor rating
 DEM Drone,beam_drone,,,,,10000000,0,100000,,100000,,,100,100,100,10000,10000,100,NONE,,,,,,,,,,,,,,,,,,,,,,,,,,,,"restricted, no_sell",,0,,,,8
 Sneaky Lobster,not_a_cat_lobster_inv,Light Cruiser,Pirate,invisibility,15,8000,0,7000,11000,500,110,,75,70,45,25,30,900,PHASE,phasecloak,,,,0.06,0.06,160,240,120,60,4,15,9,115000,3,12,240,0.25,20,20,,,,,,,,"restricted, no_sell",,0.5,2,3,,11010
 Sneaky Lobster,not_a_cat_lobster_invincible,Light Cruiser,Pirate,,15,8000,0,7000,11000,500,110,,75,70,45,25,30,900,PHASE,phasecloak,,,,0.06,0.06,160,240,120,60,4,15,9,115000,3,12,240,0.25,20,20,,,,,,,,"restricted, no_sell",,0.5,2,3,,11011
+Fake target,fake_target,,,,,100,0,100,,10,,,100,100,100,10,100,100,NONE,,,,,,,,,,,,,,,,,,,,,,,,,,,,"restricted, no_sell",,0,,,,11012

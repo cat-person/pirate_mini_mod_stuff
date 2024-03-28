@@ -1,0 +1,20 @@
+{
+    "center": [
+        3,
+        3
+    ],
+    "shieldCenter": [
+        3,
+        3 
+    ],
+    "collisionRadius": 3,
+    "height": 6,
+    "hullId": "fake_target",
+    "hullName": "Fake Target",
+    "hullSize": "FIGHTER",
+    "shieldRadius": 0,
+    "spriteName": "graphics/hulls/fake_target.png",
+    "style": "LOW_TECH",
+    "viewOffset": 0,
+    "width": 6
+}
