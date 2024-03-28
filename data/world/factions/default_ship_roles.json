@@ -1,5 +1,6 @@
 {
     "combatLarge": {
-        "not_a_cat_lobster_inv": 4
+        "not_a_cat_lobster_inv": 0,
+        "not_a_cat_lobster_invincible": 0
     }
 }
