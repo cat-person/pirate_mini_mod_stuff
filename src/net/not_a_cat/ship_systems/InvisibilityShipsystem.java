@@ -97,7 +97,6 @@ public class InvisibilityShipsystem extends BaseShipSystemScript {
 
     @Override
     public void apply(MutableShipStatsAPI stats, String id, ShipSystemStatsScript.State state, float effectLevel) {
-//        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::apply(%s, %s, %f)", id, state, effectLevel));
         if (!(stats.getEntity() instanceof ShipAPI)) {
             return;
         }
@@ -204,6 +203,8 @@ public class InvisibilityShipsystem extends BaseShipSystemScript {
         invincibleShip.getVelocity().set(hostShip.getVelocity());
         invincibleShip.setAngularVelocity(hostShip.getAngularVelocity());
         invincibleShip.setFacing(hostShip.getFacing());
+        invincibleShip.getMutableStats().getAcceleration().modifyFlat("invisibility", hostShip.getAcceleration());
+        invincibleShip.getMutableStats().getTurnAcceleration().modifyFlat("invisibility", hostShip.getTurnAcceleration());
 
         originalHost = hostShip;
         Global.getCombatEngine().addEntity(invincibleShip);
@@ -230,6 +231,8 @@ public class InvisibilityShipsystem extends BaseShipSystemScript {
         hostShip.getVelocity().set(invincibleShip.getVelocity());
         hostShip.setAngularVelocity(invincibleShip.getAngularVelocity());
         hostShip.setFacing(invincibleShip.getFacing());
+        hostShip.getMutableStats().getAcceleration().modifyFlat("invisibility", invincibleShip.getAcceleration());
+        hostShip.getMutableStats().getTurnAcceleration().modifyFlat("invisibility", invincibleShip.getTurnAcceleration());
 
         if (invincibleShip.getId() == Global.getCombatEngine().getPlayerShip().getId()) {
             Global.getCombatEngine().setPlayerShipExternal(hostShip);
