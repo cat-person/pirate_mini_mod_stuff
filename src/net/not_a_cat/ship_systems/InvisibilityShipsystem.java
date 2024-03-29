@@ -13,8 +13,8 @@ import java.util.*;
 
 public class InvisibilityShipsystem extends BaseShipSystemScript {
     ShipSystemStatsScript.State previousState = State.IDLE;
-    ShipVariantAPI invincibleVariant = Global.getSettings().createEmptyVariant("not_a_cat_lobster_invincible", Global.getSettings().getHullSpec("not_a_cat_lobster_invincible"));
-    ShipAPI invincibleShip = Global.getCombatEngine().createFXDrone(invincibleVariant);
+//    ShipVariantAPI invincibleVariant = Global.getSettings().createEmptyVariant("not_a_cat_lobster_invincible", Global.getSettings().getHullSpec("not_a_cat_lobster_invincible"));
+//    ShipAPI invincibleShip = Global.getCombatEngine().createFXDrone(invincibleVariant);
 
     ShipVariantAPI fakeTarget = Global.getSettings().createEmptyVariant("fake_target", Global.getSettings().getHullSpec("fake_target"));
 
@@ -121,11 +121,11 @@ public class InvisibilityShipsystem extends BaseShipSystemScript {
                             float dx = 400f * random.nextFloat() - 200f;
                             float dy = 400f * random.nextFloat() - 200f;
 
-                            float x = invincibleShip.getLocation().x + dx;
-                            float y = invincibleShip.getLocation().y + dy;
+                            float x = hostShip.getLocation().x + dx;
+                            float y = hostShip.getLocation().y + dy;
 
                             Global.getCombatEngine().addEntity(fakeTarget);
-                            fakeTarget.getVelocity().set(invincibleShip.getVelocity());
+                            fakeTarget.getVelocity().set(hostShip.getVelocity());
 
                             fakeTarget.getLocation().set(x, y);
 
@@ -134,18 +134,18 @@ public class InvisibilityShipsystem extends BaseShipSystemScript {
                             float dx = 400f * random.nextFloat() - 200f;
                             float dy = 400f * random.nextFloat() - 200f;
 
-                            float x = invincibleShip.getLocation().x + dx;
-                            float y = invincibleShip.getLocation().y + dy;
+                            float x = hostShip.getLocation().x + dx;
+                            float y = hostShip.getLocation().y + dy;
 
                             fakeTarget.getLocation().set(x, y);
-                            fakeTarget.getVelocity().set(invincibleShip.getVelocity());
+                            fakeTarget.getVelocity().set(hostShip.getVelocity());
 
                             fakeTargetsMap.put(fakeTarget, System.currentTimeMillis() + (long) (500f * random.nextFloat()));
                         }
                     }
                 }
 
-                for (WeaponAPI weapon : invincibleShip.getAllWeapons()) {
+                for (WeaponAPI weapon : hostShip.getAllWeapons()) {
                     if (weapon.isFiring()) {
                         becomeVisible(hostShip);
                         hostShip.getSystem().deactivate();
@@ -178,40 +178,22 @@ public class InvisibilityShipsystem extends BaseShipSystemScript {
         hostShip.setHoldFireOneFrame(true);
     }
 
+    DamageListener damageTakenListener = new DamageListener() {
+        @Override
+        public void reportDamageApplied(Object source, CombatEntityAPI target, ApplyDamageResultAPI result) {
+            becomeVisible(originalHost);
+        }
+    };
+
     void becomeInvisible(final ShipAPI hostShip, final MutableShipStatsAPI stats, final String id) {
-
-
-        if (invincibleVariant.getWeaponGroups().isEmpty()) {
-            for (WeaponAPI weapon : hostShip.getAllWeapons()) {
-                invincibleVariant.addWeapon(weapon.getSlot().getId(), weapon.getId());
-            }
-        }
-
-        invincibleShip = Global.getCombatEngine().createFXDrone(invincibleVariant);
-
-        invincibleShip.addListener(new DamageListener() {
-            @Override
-            public void reportDamageApplied(Object source, CombatEntityAPI target, ApplyDamageResultAPI result) {
-                becomeVisible(hostShip);
-                hostShip.getSystem().deactivate();
-            }
-        });
-
         Global.getLogger(InvisibilityShipsystem.class).info(String.format("::becomeInvisible(%s)", hostShip.getId()));
-
-        invincibleShip.getLocation().set(hostShip.getLocation());
-        invincibleShip.getVelocity().set(hostShip.getVelocity());
-        invincibleShip.setAngularVelocity(hostShip.getAngularVelocity());
-        invincibleShip.setFacing(hostShip.getFacing());
-        invincibleShip.getMutableStats().getAcceleration().modifyFlat("invisibility", hostShip.getAcceleration());
-        invincibleShip.getMutableStats().getTurnAcceleration().modifyFlat("invisibility", hostShip.getTurnAcceleration());
-
         originalHost = hostShip;
-        Global.getCombatEngine().addEntity(invincibleShip);
-        if (hostShip.getId().equals(Global.getCombatEngine().getPlayerShip().getId())) {
-            Global.getCombatEngine().setPlayerShipExternal(invincibleShip);
-        }
-        hostShip.getLocation().set(10000f, 10000f); // Far, far away
+//        hostShip.getMutableStats().getArmorDamageTakenMult().modifyMult("invisibility", 0f);
+        hostShip.getMutableStats().getHullDamageTakenMult().modifyMult("invisibility", 0f);
+        hostShip.getMutableStats().getWeaponDamageTakenMult().modifyMult("invisibility", 0f);
+        hostShip.getMutableStats().getEngineDamageTakenMult().modifyMult("invisibility", 0f);
+
+        hostShip.addListener(damageTakenListener);
     }
 
     void phaseOut(ShipAPI hostShip) {
@@ -226,23 +208,21 @@ public class InvisibilityShipsystem extends BaseShipSystemScript {
 
     void becomeVisible(ShipAPI hostShip) {
         Global.getLogger(InvisibilityShipsystem.class).info(String.format("::becomeVisible(%s)", hostShip.getId()));
+//        hostShip.getMutableStats().getArmorDamageTakenMult().modifyMult("invisibility", 1f);
+        hostShip.getMutableStats().getHullDamageTakenMult().modifyMult("invisibility", 1f);
+        hostShip.getMutableStats().getWeaponDamageTakenMult().modifyMult("invisibility", 1f);
+        hostShip.getMutableStats().getEngineDamageTakenMult().modifyMult("invisibility", 1f);
 
-        hostShip.getLocation().set(invincibleShip.getLocation());
-        hostShip.getVelocity().set(invincibleShip.getVelocity());
-        hostShip.setAngularVelocity(invincibleShip.getAngularVelocity());
-        hostShip.setFacing(invincibleShip.getFacing());
-        hostShip.getMutableStats().getAcceleration().modifyFlat("invisibility", invincibleShip.getAcceleration());
-        hostShip.getMutableStats().getTurnAcceleration().modifyFlat("invisibility", invincibleShip.getTurnAcceleration());
+        hostShip.removeListener(damageTakenListener);
 
-        if (invincibleShip.getId() == Global.getCombatEngine().getPlayerShip().getId()) {
-            Global.getCombatEngine().setPlayerShipExternal(hostShip);
+        if(hostShip.getSystem().isActive()) {
+            hostShip.getSystem().deactivate();
         }
 
         for (ShipAPI fakeTarget : fakeTargetDrones) {
             Global.getCombatEngine().removeEntity(fakeTarget);
         }
         fakeTargetsMap.clear();
-        Global.getCombatEngine().removeEntity(invincibleShip);
     }
 
     @Override
