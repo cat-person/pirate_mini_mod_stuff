@@ -5,16 +5,12 @@ import com.fs.starfarer.api.combat.*;
 import com.fs.starfarer.api.combat.listeners.ApplyDamageResultAPI;
 import com.fs.starfarer.api.combat.listeners.DamageListener;
 import com.fs.starfarer.api.impl.combat.BaseShipSystemScript;
-import com.fs.starfarer.api.loading.WeaponGroupSpec;
 import com.fs.starfarer.api.plugins.ShipSystemStatsScript;
 
-import java.awt.Color;
 import java.util.*;
 
 public class InvisibilityShipsystem extends BaseShipSystemScript {
     ShipSystemStatsScript.State previousState = State.IDLE;
-//    ShipVariantAPI invincibleVariant = Global.getSettings().createEmptyVariant("not_a_cat_lobster_invincible", Global.getSettings().getHullSpec("not_a_cat_lobster_invincible"));
-//    ShipAPI invincibleShip = Global.getCombatEngine().createFXDrone(invincibleVariant);
 
     ShipVariantAPI fakeTarget = Global.getSettings().createEmptyVariant("fake_target", Global.getSettings().getHullSpec("fake_target"));
 
@@ -67,6 +63,7 @@ public class InvisibilityShipsystem extends BaseShipSystemScript {
                     phaseOut(hostShip);
                     becomeInvisible(hostShip, stats, id);
                 } else {
+
                     for (ShipAPI fakeTarget : fakeTargetDrones) {
                         if (!fakeTargetsMap.containsKey(fakeTarget)) {
                             float dx = 400f * random.nextFloat() - 200f;
@@ -114,11 +111,6 @@ public class InvisibilityShipsystem extends BaseShipSystemScript {
         previousState = state;
     }
 
-    @Override
-    public void unapply(MutableShipStatsAPI stats, String id) {
-//        Global.getLogger(InvisibilityShipsystem.class).info(String.format("::unapply(%s)", id));
-    }
-
     void phaseIn(ShipAPI hostShip) {
         Global.getLogger(InvisibilityShipsystem.class).info(String.format("::phaseIn(%s)", hostShip.getId()));
         ShipSystemAPI cloak = hostShip.getPhaseCloak();
@@ -138,6 +130,7 @@ public class InvisibilityShipsystem extends BaseShipSystemScript {
 
     void becomeInvisible(final ShipAPI hostShip, final MutableShipStatsAPI stats, final String id) {
         Global.getLogger(InvisibilityShipsystem.class).info(String.format("::becomeInvisible(%s)", hostShip.getId()));
+
         originalHost = hostShip;
         hostShip.getMutableStats().getHullDamageTakenMult().modifyMult("invisibility", 0f);
         hostShip.getMutableStats().getWeaponDamageTakenMult().modifyMult("invisibility", 0f);
@@ -166,7 +159,7 @@ public class InvisibilityShipsystem extends BaseShipSystemScript {
         hostShip.setAlphaMult(1f);
         hostShip.removeListener(damageTakenListener);
 
-        if(hostShip.getSystem().isActive()) {
+        if (hostShip.getSystem().isActive()) {
             hostShip.getSystem().deactivate();
         }
 
